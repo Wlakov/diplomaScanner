@@ -96,7 +96,7 @@ def main():
             choice = input("Option Selection: ")
             if choice == "1":
                 try:
-                    print(nmap)
+                    # print(nmap)
                     # os.mkdir(target)
                     # os.chdir(target)
                     os.system(nmap)
@@ -104,6 +104,9 @@ def main():
                     # os.system(convert)
                     t3 = datetime.now()
                     total1 = t3 - t1
+                    with open("output_file_path.txt", "w") as output_file:
+                        subprocess.run(nmap, shell=True, stdout=output_file, stderr=subprocess.STDOUT)
+                    print(nmap)
                     print("-" * 60)
                     print("Combined scan completed in " + str(total1))
                     print("Press enter to quit...")
@@ -128,3 +131,5 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("\nGoodbye!")
         quit()
+
+#  45.44.151.148
