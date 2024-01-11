@@ -1,7 +1,6 @@
 import nmap
 import mysql.connector
 
-
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -14,7 +13,7 @@ mycursor = mydb.cursor()
 
 def nmap_version_scan(target_ip):
     nm = nmap.PortScanner()
-    nm.scan(target_ip, arguments='-sV')
+    nm.scan(target_ip, arguments='-sV -O')
 
     scan_results = []
 
@@ -25,16 +24,6 @@ def nmap_version_scan(target_ip):
                 sql = "INSERT  INTO scan_results (ip, port, protocol, service, product, version) VALUES (%s,%s,%s,%s,%s,%s)"
                 service = nm[host][proto][port]
                 values = host, port, proto, service['name'], service['product'], service['version']
-
-
-
-                
-
-
-
-
-
-
 
                 mycursor.execute(sql, values)
                 mydb.commit()
@@ -59,7 +48,5 @@ if __name__ == '__main__':
         print(f"Service: {result['service_name']}, Product: {result['service_product']}")
         print(f"Version: {result['service_version']}")
         print("-" * 30)
-
-
 
 # 45.44.151.148
