@@ -1,5 +1,5 @@
 import paramiko
-import telnetlib
+import telnetlib3
 
 
 def check_ssh_default_password(hostname, username, password):
@@ -17,7 +17,8 @@ def check_ssh_default_password(hostname, username, password):
 
 def check_telnet_default_password(hostname, username, password):
     try:
-        tn = telnetlib.Telnet(hostname)
+        tn = telnetlib3.open_connection(hostname)
+        tn.send()
         tn.read_until(b"login: ")
         tn.write(username.encode('ascii') + b"\n")
         tn.read_until(b"Password: ")
@@ -49,3 +50,4 @@ if __name__ == "__main__":
     telnet_default_passwords = ["root", "admin", "toor", "password", "12345"]
     for password in telnet_default_passwords:
         check_telnet_default_password(target_host, username, password)
+
