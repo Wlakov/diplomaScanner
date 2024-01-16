@@ -1,6 +1,6 @@
+from _mysql_connector import MySQL
 from flask import Flask, render_template, session, request, redirect, url_for
-from flask_mysqldb import MySQL
-
+import mysql
 app = Flask(__name__)
 
 app.config['MYSQL_USER'] = 'your_mysql_username'
