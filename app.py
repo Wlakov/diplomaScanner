@@ -1,15 +1,14 @@
-from _mysql_connector import MySQL
 from flask import Flask, render_template, session, request, redirect, url_for
-import mysql
+from flask_mysqldb import MySQL
 app = Flask(__name__)
 
-app.config['MYSQL_USER'] = 'your_mysql_username'
-app.config['MYSQL_PASSWORD'] = 'your_mysql_password'
-app.config['MYSQL_DB'] = 'flask_auth'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'kali'
+app.config['MYSQL_DB'] = 'Testip'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 # Initialize MySQL
-mysql = MySQL(app)
+MySQL = MySQL(app)
 
 # Set a secret key for the session
 app.secret_key = 'your_secret_key'
@@ -24,7 +23,7 @@ def login():
 
         # Validate the credentials against the database
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, password))
+        cur.execute("SELECT * FROM credentials WHERE username=%s AND password=%s", (username, password))
         user = cur.fetchone()
 
         # If the credentials are valid, create a new session for the user
