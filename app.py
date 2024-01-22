@@ -1,14 +1,16 @@
-from flask import Flask, render_template, session, request, redirect, url_for
-from flask_mysqldb import MySQL
+import mysql.connector
+from flask import Flask, render_template, request, redirect, url_for, session
+import hashlib
+from scanner import nmap_version_scan
+
 app = Flask(__name__)
 
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'kali'
-app.config['MYSQL_DB'] = 'Testip'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-
-# Initialize MySQL
-MySQL = MySQL(app)
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="kali",
+    database="Testip"
+)
 
 # Set a secret key for the session
 app.secret_key = 'your_secret_key'
@@ -16,45 +18,54 @@ app.secret_key = 'your_secret_key'
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        # Retrieve the user's credentials from the request
+    # Output message if something goes wrong...
+    msg = ''
+    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+        # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
-
-        # Validate the credentials against the database
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM credentials WHERE username=%s AND password=%s", (username, password))
-        user = cur.fetchone()
-
-        # If the credentials are valid, create a new session for the user
-        if user:
-            session['username'] = user['username']
+        params = (username, password)
+        print(params)
+        # Retrieve the hashed password
+        hash = password + app.secret_key
+        hash = hashlib.sha1(hash.encode())
+        password = hash.hexdigest()
+        cursor = mydb.cursor()
+        query = 'SELECT * FROM accounts WHERE username = %s AND password = %s'
+        cursor.execute(query, params)
+        account = cursor.fetchone()
+        print(account)
+        if account:
+            # Create session data, we can access this data in other routes
+            session['loggedin'] = True
+            session['id'] = account[0]
+            # session['username'] = account[0]
+            print('logged')
             return redirect(url_for('index'))
         else:
-            # If the credentials are invalid, return an error message to the user
-            return 'Invalid credentials'
-
-    else:
-        # If the request method is GET, return the login form
-        return render_template('loginForm.html')
+            msg = 'Incorrect username/password!'
+            print(msg)
+    return render_template('loginForm.html', msg='')
 
 
-@app.route('/index')
+@app.route('/login/index', methods=["GET", "POST"])
 def index():
-    # If the user is not logged in, redirect them to the login page
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'loggedin' in session:
+        cur = mydb.cursor()
+        cur.execute("SELECT * FROM scan_results")
+        scans = cur.fetchall()
+        print(scans)
+        cur.close()
+        return render_template('index.html', scans=scans)
 
-    # If the user is logged in, display a welcome message
-    return render_template('index.html')
 
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    name = request.form['name']
-    age = int(request.form['age'])
-
-    return redirect(url_for('index'))
+def gfg():
+    if request.method == "POST":
+        ip = request.form['ip']
+        print(ip)
+        nmap_version_scan(ip)
+        return ip
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

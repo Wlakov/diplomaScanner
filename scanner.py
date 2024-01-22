@@ -13,7 +13,8 @@ mycursor = mydb.cursor()
 
 def nmap_version_scan(target_ip):
     nm = nmap.PortScanner()
-    nm.scan(target_ip, arguments='-sV -O')
+    sc = nm.scan(target_ip, arguments='-sV -O')
+    print(sc)
 
     scan_results = []
 
@@ -41,8 +42,8 @@ def nmap_version_scan(target_ip):
 
 
 if __name__ == '__main__':
-    target_ip = "45.44.151.148"
-    scan_results = nmap_version_scan(target_ip)
+    ip = ''
+    scan_results = nmap_version_scan(ip)
     for result in scan_results:
         print(f"IP: {result['ip']}, Port: {result['port']}, Protocol: {result['protocol']}")
         print(f"Service: {result['service_name']}, Product: {result['service_product']}")
@@ -50,3 +51,4 @@ if __name__ == '__main__':
         print("-" * 30)
 
 # 45.44.151.148
+
